@@ -8,7 +8,7 @@ import * as uri from "valid-url";
 import { ParsedMessage } from "./regex";
 import { ErrorTypes, Header, Payload, Signature, SignInWithStarkwareError, SignInWithStarkwareResponse, VerifyParams } from "./types";
 
-export class SIWS {
+export class SIWStarkware {
   header: Header;
 
   payload: Payload;
@@ -19,9 +19,9 @@ export class SIWS {
    * Creates a parsed Sign-In with Starkware Message object from a
    * string or an object. If a string is used an parser is called to
    * validate the parameter, otherwise the fields are attributed.
-   * @param param {string | SIWS} Sign message as a string or an object.
+   * @param param {string | SIWStarkware} Sign message as a string or an object.
    */
-  constructor(param: string | Partial<SIWS>) {
+  constructor(param: string | Partial<SIWStarkware>) {
     if (typeof param === "string") {
       const parsedMessage = new ParsedMessage(param);
       this.payload = {
@@ -182,12 +182,12 @@ export class SIWS {
    * @returns {Promise<SignInWithStarkwareResponse>} This object if valid.
    */
   verify(params: VerifyParams, kp: KeyPair | IStarknetWindowObject): Promise<SignInWithStarkwareResponse> {
-    return new Promise<SignInWithStarkwareResponse>((resolve) => {
+    return new Promise<SignInWithStarkwareResponse>((resolve, reject) => {
       const { payload, network, signature } = params;
 
       /** Domain binding */
       if (payload.domain && payload.domain !== this.payload.domain) {
-        resolve({
+        reject({
           success: false,
           data: this,
           error: new SignInWithStarkwareError(ErrorTypes.DOMAIN_MISMATCH, payload.domain, this.payload.domain),
@@ -196,7 +196,7 @@ export class SIWS {
 
       /** Nonce binding */
       if (payload.nonce && payload.nonce !== this.payload.nonce) {
-        resolve({
+        reject({
           success: false,
           data: this,
           error: new SignInWithStarkwareError(ErrorTypes.NONCE_MISMATCH, payload.nonce, this.payload.nonce),
@@ -212,7 +212,7 @@ export class SIWS {
 
         // Check if the message hasn't expired
         if (checkTime.getTime() >= expirationDate.getTime()) {
-          resolve({
+          reject({
             success: false,
             data: this,
             error: new SignInWithStarkwareError(
@@ -228,7 +228,7 @@ export class SIWS {
       if (this.payload.notBefore) {
         const notBefore = new Date(this.payload.notBefore);
         if (checkTime.getTime() < notBefore.getTime()) {
-          resolve({
+          reject({
             success: false,
             data: this,
             error: new SignInWithStarkwareError(
@@ -268,7 +268,7 @@ export class SIWS {
           .verifyMessage(typedMessage, signature.s)
           .then((valid) => {
             if (!valid)
-              return resolve({
+              return reject({
                 success: false,
                 data: this,
                 error: new SignInWithStarkwareError(ErrorTypes.INVALID_SIGNATURE, "Signature verfication failed"),
@@ -278,17 +278,20 @@ export class SIWS {
               data: this,
             });
           })
-          .catch((error) => {
-            return resolve({
+          .catch(() => {
+            return reject({
               success: false,
               data: this,
-              error: new SignInWithStarkwareError(ErrorTypes.INVALID_SIGNATURE, "Signature verfication failed. Check if you have an account created."),
+              error: new SignInWithStarkwareError(
+                ErrorTypes.INVALID_SIGNATURE,
+                "Signature verfication failed. Check if you have an account created."
+              ),
             });
           });
       } else {
         const valid = ec.verify(kp, getMessageHash(typedMessage, payload.address), signature.s);
         if (!valid)
-          return resolve({
+          return reject({
             success: false,
             data: this,
             error: new SignInWithStarkwareError(ErrorTypes.INVALID_SIGNATURE, "Signature verfication failed"),

@@ -1,4 +1,4 @@
-import { SIWS } from "./client";
+import { SIWStarkware } from "./client";
 
 export class SignatureMeta {}
 
@@ -139,5 +139,5 @@ export interface SignInWithStarkwareResponse {
   error?: SignInWithStarkwareError;
 
   /** Original message that was verified. */
-  data: SIWS;
+  data: SIWStarkware;
 }
