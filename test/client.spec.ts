@@ -34,7 +34,7 @@ describe(`Message Validation`, function () {
       const { signature } = value;
       const msg = new SIWStarkware({ payload });
       const starkKeyPair = ec.getKeyPair(payload.address);
-      const verify = await msg.verify({ payload, signature }, starkKeyPair);
+      const verify = await msg.verify({ payload, signature, kp: starkKeyPair });
       assert.equal(verify.success, true);
     });
   });
@@ -46,7 +46,7 @@ describe(`Message Validation`, function () {
         const { signature } = value;
         const msg = new SIWStarkware({ payload });
         const starkKeyPair = ec.getKeyPair(payload.address);
-        await msg.verify({ payload, signature }, starkKeyPair);
+        await msg.verify({ payload, signature, kp: starkKeyPair });
       } catch (error) {
         expect(Object.values(SIWStarkware).includes(error));
       }

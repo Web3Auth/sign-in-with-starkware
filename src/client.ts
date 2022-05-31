@@ -1,6 +1,6 @@
 import { randomStringForEntropy } from "@stablelib/random";
 import { IStarknetWindowObject } from "get-starknet";
-import { ec, KeyPair } from "starknet";
+import { ec } from "starknet";
 import { starknetKeccak } from "starknet/dist/utils/hash";
 import { getMessageHash } from "starknet/dist/utils/typedData";
 import * as uri from "valid-url";
@@ -181,7 +181,7 @@ export class SIWStarkware {
    * @param params Parameters to verify the integrity of the message, signature is required.
    * @returns {Promise<SignInWithStarkwareResponse>} This object if valid.
    */
-  verify(params: VerifyParams, kp: KeyPair | IStarknetWindowObject): Promise<SignInWithStarkwareResponse> {
+  verify(params: VerifyParams): Promise<SignInWithStarkwareResponse> {
     return new Promise<SignInWithStarkwareResponse>((resolve, reject) => {
       const { payload, network, signature } = params;
 
@@ -262,7 +262,7 @@ export class SIWStarkware {
         },
       };
 
-      const starknetObject = kp as IStarknetWindowObject;
+      const starknetObject = params.kp as IStarknetWindowObject;
       if (starknetObject.account !== undefined) {
         starknetObject.account
           .verifyMessage(typedMessage, signature.s)
@@ -289,7 +289,7 @@ export class SIWStarkware {
             });
           });
       } else {
-        const valid = ec.verify(kp, getMessageHash(typedMessage, payload.address), signature.s);
+        const valid = ec.verify(params.kp, getMessageHash(typedMessage, payload.address), signature.s);
         if (!valid)
           return reject({
             success: false,

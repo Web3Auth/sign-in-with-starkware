@@ -1,4 +1,4 @@
-import { Header, Payload, SIWS } from '@web3auth/sign-in-with-starkware';
+import { Header, Payload, SIWStarkware } from '@web3auth/sign-in-with-starkware';
 import { getStarknet } from "get-starknet";
 import { useState } from 'react';
 import { starknetKeccak } from 'starknet/dist/utils/hash';
@@ -6,8 +6,6 @@ import Swal from 'sweetalert';
 import './App.css';
 
 import StarkwareLogo from './starknet-logo.png';
-
-
 
 const MyWallet = () => {
   
@@ -60,7 +58,7 @@ const MyWallet = () => {
       const header = new Header();
       header.t = "eip191";
       
-      let message = new SIWS({ header, payload });
+      let message = new SIWStarkware({ header, payload });
       // we need the nonce for verification so getting it in a global variable
       setNonce(message.payload.nonce);
       setSiwsMessage(message);
@@ -166,12 +164,14 @@ const networkId = () => {
                           s: sign.split(",")
                       } 
                       const payload = siwsMessage.payload;
-                      siwsMessage.verify({ payload, networkId,signature },provider).then(resp => {
+                      siwsMessage.verify({ payload, networkId,signature, kp: provider }).then(resp => {
                           if (resp.success == true) {
                               new Swal("Success","Signature Verified","success")
                           } else {
                               new Swal("Error",resp.error.type,"error")
                           }
+                      }).catch(err => { 
+                        new Swal("Error",err.error.toString(),"error")
                       });
                   }}>Verify</button>
                   <button className='web3auth' id='verify' onClick={e => {
