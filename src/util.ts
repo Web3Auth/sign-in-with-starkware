@@ -5,7 +5,7 @@ const browserCrypto = global.crypto || global.msCrypto || {};
 export function randomBytes(size: number): Buffer {
   const arr = new Uint8Array(size);
   if (typeof browserCrypto.getRandomValues === "undefined") {
-    nodeCrypto.getRandomValues(arr);
+    return Buffer.from(nodeCrypto.randomBytes(size));
   }
   browserCrypto.getRandomValues(arr);
 
