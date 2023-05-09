@@ -137,10 +137,10 @@ time (optional)
 ```
 There are certain checks in place such as invalid domain check,nonce binding check, expiry checks etc
 ```js
-import { IStarknetWindowObject } from "get-starknet";
+import { StarknetWindowObject } from "get-starknet";
 .
 .
-// starknetObject is of type <IStarknetWindowObject>
+// starknetObject is of type <StarknetWindowObject>
 starknetObject.account.verifyMessage(<typedMessage>, <signature>)
 ```
 If this function returns a true value then it is a valid signature

@@ -1,12 +1,10 @@
-import { randomStringForEntropy } from "@stablelib/random";
-import { IStarknetWindowObject } from "get-starknet";
-import { ec } from "starknet";
-import { starknetKeccak } from "starknet/dist/utils/hash";
-import { getMessageHash } from "starknet/dist/utils/typedData";
+import type { StarknetWindowObject } from "get-starknet";
+import { ec, hash, typedData } from "starknet";
 import * as uri from "valid-url";
 
 import { ParsedMessage } from "./regex";
 import { ErrorTypes, Header, Payload, Signature, SignInWithStarkwareError, SignInWithStarkwareResponse, VerifyParams } from "./types";
+import { randomBytes } from "./util";
 
 export class SIWStarkware {
   header: Header;
@@ -44,7 +42,7 @@ export class SIWStarkware {
         this.payload.chainId = parseInt(this.payload.chainId);
       }
       if (!this.payload.nonce) {
-        this.payload.nonce = randomStringForEntropy(96);
+        this.payload.nonce = randomBytes(8).toString("hex");
       }
       if (!this.payload.issuedAt) {
         this.payload.issuedAt = new Date().toISOString();
@@ -69,7 +67,7 @@ export class SIWStarkware {
     const uriField = `URI: ${this.payload.uri}`;
     let prefix = [header, this.payload.address].join("\n");
     const versionField = `Version: ${this.payload.version}`;
-    const chainField = `Chain ID: ${this.payload.chainId}` || "1";
+    const chainField = `Chain ID: ${this.payload.chainId || 1}`;
     const nonceField = `Nonce: ${this.payload.nonce}`;
     const suffixArray = [uriField, versionField, chainField, nonceField];
     if (this.payload.issuedAt) {
@@ -187,7 +185,7 @@ export class SIWStarkware {
 
       /** Domain binding */
       if (payload.domain && payload.domain !== this.payload.domain) {
-        reject({
+        resolve({
           success: false,
           data: this,
           error: new SignInWithStarkwareError(ErrorTypes.DOMAIN_MISMATCH, payload.domain, this.payload.domain),
@@ -196,7 +194,7 @@ export class SIWStarkware {
 
       /** Nonce binding */
       if (payload.nonce && payload.nonce !== this.payload.nonce) {
-        reject({
+        resolve({
           success: false,
           data: this,
           error: new SignInWithStarkwareError(ErrorTypes.NONCE_MISMATCH, payload.nonce, this.payload.nonce),
@@ -212,7 +210,7 @@ export class SIWStarkware {
 
         // Check if the message hasn't expired
         if (checkTime.getTime() >= expirationDate.getTime()) {
-          reject({
+          resolve({
             success: false,
             data: this,
             error: new SignInWithStarkwareError(
@@ -228,7 +226,7 @@ export class SIWStarkware {
       if (this.payload.notBefore) {
         const notBefore = new Date(this.payload.notBefore);
         if (checkTime.getTime() < notBefore.getTime()) {
-          reject({
+          resolve({
             success: false,
             data: this,
             error: new SignInWithStarkwareError(
@@ -240,8 +238,7 @@ export class SIWStarkware {
         }
       }
 
-      const message = starknetKeccak(this.prepareMessage()).toString("hex").substring(0, 31);
-
+      const message = hash.starknetKeccak(this.prepareMessage()).toString("hex").substring(0, 31);
       const typedMessage = {
         domain: {
           name: "Example DApp",
@@ -262,7 +259,7 @@ export class SIWStarkware {
         },
       };
 
-      const starknetObject = params.kp as IStarknetWindowObject;
+      const starknetObject = params.kp as StarknetWindowObject;
       if (starknetObject.account !== undefined) {
         starknetObject.account
           .verifyMessage(typedMessage, signature.s)
@@ -279,7 +276,7 @@ export class SIWStarkware {
             });
           })
           .catch(() => {
-            return reject({
+            return resolve({
               success: false,
               data: this,
               error: new SignInWithStarkwareError(
@@ -289,17 +286,19 @@ export class SIWStarkware {
             });
           });
       } else {
-        const valid = ec.verify(params.kp, getMessageHash(typedMessage, payload.address), signature.s);
-        if (!valid)
-          return reject({
+        const valid = ec.verify(params.kp, typedData.getMessageHash(typedMessage, payload.address), signature.s);
+        if (!valid) {
+          resolve({
             success: false,
             data: this,
             error: new SignInWithStarkwareError(ErrorTypes.INVALID_SIGNATURE, "Signature verfication failed"),
           });
-        return resolve({
-          success: true,
-          data: this,
-        });
+        } else {
+          resolve({
+            success: true,
+            data: this,
+          });
+        }
       }
     });
   }
