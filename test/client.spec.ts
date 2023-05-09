@@ -1,7 +1,7 @@
 /* eslint-disable mocha/max-top-level-suites */
 /* eslint-disable mocha/no-setup-in-describe */
 import assert from "assert";
-import { ec, hash, stark } from "starknet";
+import { ec, hash, stark, typedData } from "starknet";
 
 import { ErrorTypes, Signature, SIWStarkware } from "../src/index";
 import parsingPositive from "./parsing_positive.json";
@@ -56,15 +56,34 @@ describe(`Message Validation`, function () {
 describe(`Round Trip`, function () {
   const privateKey = stark.randomAddress();
   const starkKeyPair = ec.getKeyPair(privateKey);
-  const fullPublicKey = starkKeyPair.getPublic("hex");
-
+  const fullPublicKey = ec.getStarkKey(starkKeyPair);
   Object.entries(parsingPositive).forEach(([test, el]) => {
     it(`Generates a Successfully Verifying message: ${test}`, async function () {
       const { payload } = el.fields;
       payload.address = fullPublicKey;
       const msg = new SIWStarkware({ payload });
       const signature = new Signature();
-      signature.s = ec.sign(starkKeyPair, hash.starknetKeccak(msg.toMessage()).toString("hex"));
+      const message = hash.starknetKeccak(msg.prepareMessage()).toString("hex").substring(0, 31);
+      const typedMessage: typedData.TypedData = {
+        domain: {
+          name: "Example DApp",
+          chainId: payload.chainId,
+          version: "0.0.1",
+        },
+        types: {
+          StarkNetDomain: [
+            { name: "name", type: "felt" },
+            { name: "chainId", type: "felt" },
+            { name: "version", type: "felt" },
+          ],
+          Message: [{ name: "message", type: "felt" }],
+        },
+        primaryType: "Message",
+        message: {
+          message,
+        },
+      };
+      signature.s = ec.sign(starkKeyPair, typedData.getMessageHash(typedMessage, payload.address));
       signature.t = "eip191";
       const success = await msg.verify({ signature, payload, kp: starkKeyPair });
       assert.ok(success);
