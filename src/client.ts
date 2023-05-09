@@ -1,6 +1,6 @@
 import type { StarknetWindowObject } from "get-starknet";
 import { ec, hash, typedData } from "starknet";
-import * as uri from "valid-url";
+import { isUri } from "valid-url";
 
 import { ParsedMessage } from "./regex";
 import { ErrorTypes, Header, Payload, Signature, SignInWithStarkwareError, SignInWithStarkwareResponse, VerifyParams } from "./types";
@@ -135,7 +135,7 @@ export class SIWStarkware {
     }
 
     /** Check if the URI is valid. */
-    if (!uri.isUri(this.payload.uri)) {
+    if (!isUri(this.payload.uri)) {
       throw new SignInWithStarkwareError(ErrorTypes.INVALID_URI, `${this.payload.uri} to be a valid uri.`);
     }
 
