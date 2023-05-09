@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/sign-in-with-starkware",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "",
   "main": "dist/signInWithStarkware.cjs.js",
   "module": "dist/signInWithStarkware.esm.js",
