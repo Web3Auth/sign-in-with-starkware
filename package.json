@@ -8,9 +8,9 @@
   "jsdelivr": "dist/signInWithStarkware.umd.min.js",
   "types": "dist/types/index.d.ts",
   "scripts": {
-    "dev": "torus-scripts build",
+    "release": "torus-scripts release",
     "build": "torus-scripts build",
-    "lint:ts": "eslint --fix 'src/**/*.ts'",
+    "lint": "eslint --fix 'src/**/*.ts'",
     "test": "mocha"
   },
   "repository": {
