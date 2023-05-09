@@ -1,4 +1,4 @@
-import { IStarknetWindowObject } from "get-starknet";
+import type { StarknetWindowObject } from "get-starknet";
 import { KeyPair } from "starknet";
 
 import { SIWStarkware } from "./client";
@@ -129,7 +129,7 @@ export interface VerifyParams {
   payload: Payload;
   network?: string;
   signature: Signature;
-  kp: KeyPair | IStarknetWindowObject;
+  kp: KeyPair | StarknetWindowObject;
 }
 
 /**
