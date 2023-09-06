@@ -17,7 +17,7 @@ export class SIWStarkware {
    * Creates a parsed Sign-In with Starkware Message object from a
    * string or an object. If a string is used an parser is called to
    * validate the parameter, otherwise the fields are attributed.
-   * @param param {string | SIWStarkware} Sign message as a string or an object.
+   * @param param - Sign message as a string or an object.
    */
   constructor(param: string | Partial<SIWStarkware>) {
     if (typeof param === "string") {
@@ -56,7 +56,7 @@ export class SIWStarkware {
    * [prepareMessage()] instead which will resolve to the correct method based
    * on the [type] attribute of this object, in case of other formats being
    * implemented.
-   * @returns {string} message
+   * @returns message
    */
   toMessage(): string {
     /** Validates all fields of the object */
@@ -105,7 +105,7 @@ export class SIWStarkware {
   /**
    * This method parses all the fields in the object and creates a sign
    * message according with the type defined.
-   * @returns {string} Returns a message ready to be signed according with the
+   * @returns Returns a message ready to be signed according with the
    * type defined in the object.
    */
   prepareMessage(): string {
@@ -126,7 +126,7 @@ export class SIWStarkware {
 
   /**
    * Validates the value of this object fields.
-   * @throws Throws an {ErrorType} if a field is invalid.
+   * @throws Throws an ErrorType if a field is invalid.
    */
   validate() {
     /** `domain` check. */
@@ -176,8 +176,8 @@ export class SIWStarkware {
 
   /**
    * Validates the integrity of the object by matching it's signature.
-   * @param params Parameters to verify the integrity of the message, signature is required.
-   * @returns {Promise<SignInWithStarkwareResponse>} This object if valid.
+   * @param params - Parameters to verify the integrity of the message, signature is required.
+   * @returns This object if valid.
    */
   verify(params: VerifyParams): Promise<SignInWithStarkwareResponse> {
     return new Promise<SignInWithStarkwareResponse>((resolve, reject) => {
@@ -263,8 +263,9 @@ export class SIWStarkware {
       if (starknetObject.account !== undefined) {
         starknetObject.account
           .verifyMessage(typedMessage, signature.s)
-          .then((valid) => {
+          .then((valid: boolean) => {
             if (!valid)
+              // eslint-disable-next-line prefer-promise-reject-errors
               return reject({
                 success: false,
                 data: this,

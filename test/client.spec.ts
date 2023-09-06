@@ -47,7 +47,7 @@ describe(`Message Validation`, function () {
         const error = await msg.verify({ payload, signature, kp: starkKeyPair });
         assert(Object.values(ErrorTypes).includes(error.error.type));
       } catch (error) {
-        assert(Object.values(ErrorTypes).includes(error.message));
+        assert((Object.values(ErrorTypes) as string[]).includes((error as Error).message));
       }
     });
   });

@@ -1,6 +1,7 @@
 import nodeCrypto from "crypto";
 
-const browserCrypto = global.crypto || global.msCrypto || {};
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const browserCrypto = global.crypto || (global as any).msCrypto || {};
 
 export function randomBytes(size: number): Buffer {
   const arr = new Uint8Array(size);
