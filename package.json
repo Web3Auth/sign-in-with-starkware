@@ -6,7 +6,7 @@
   "module": "dist/lib.esm/index.js",
   "unpkg": "dist/signInWithStarkware.umd.min.js",
   "jsdelivr": "dist/signInWithStarkware.umd.min.js",
-  "types": "dist/types/index.d.ts",
+  "types": "dist/lib.cjs/types/index.d.ts",
   "sideEffects": false,
   "scripts": {
     "release": "torus-scripts release",
@@ -39,7 +39,7 @@
     "@vitest/browser": "^3.0.8",
     "@vitest/coverage-istanbul": "^3.0.8",
     "eslint": "^9.22.0",
-    "get-starknet": "^3.3.3",
+    "get-starknet": "^2.1.0",
     "loglevel": "^1.9.2",
     "mocha": "^11.1.0",
     "playwright": "^1.51.0",

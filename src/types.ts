@@ -1,5 +1,5 @@
 import type { StarknetWindowObject } from "get-starknet";
-import { KeyPair } from "starknet";
+import type { KeyPair } from "starknet";
 
 import { SIWStarkware } from "./client";
 
