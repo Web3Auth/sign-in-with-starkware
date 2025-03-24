@@ -238,7 +238,7 @@ export class SIWStarkware {
         }
       }
 
-      const message = hash.starknetKeccak(this.prepareMessage()).toString("hex").substring(0, 31);
+      const message = hash.starknetKeccak(this.prepareMessage()).toString(16).substring(0, 31);
       const typedMessage = {
         domain: {
           name: "Example DApp",
@@ -265,7 +265,6 @@ export class SIWStarkware {
           .verifyMessage(typedMessage, signature.s)
           .then((valid: boolean) => {
             if (!valid)
-              // eslint-disable-next-line prefer-promise-reject-errors
               return reject({
                 success: false,
                 data: this,

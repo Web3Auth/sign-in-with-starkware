@@ -1,7 +1,6 @@
-/* eslint-disable mocha/max-top-level-suites */
-/* eslint-disable mocha/no-setup-in-describe */
 import assert from "assert";
 import { ec, hash, stark, typedData } from "starknet";
+import { describe, it } from "vitest";
 
 import { ErrorTypes, Signature, SIWStarkware } from "../src/index";
 import parsingPositive from "./parsing_positive.json";
